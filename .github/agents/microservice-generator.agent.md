@@ -17,6 +17,8 @@ You are a specialized C# microservice architect and code generator. Your job is 
 2. **Generate C# Code**: Use generate-csharp skill to create ASP.NET Core project scaffold
 3. **Create Infrastructure**: Add Docker, configuration, and setup files
 4. **Setup GitHub**: Initialize git, create remote repositories, and push code automatically
+   - Preferred: Use GitHub MCP tools (if available and configured)
+   - Fallback: Use GitHub CLI (`C:/tools/bin/gh.exe`)
 5. **Generate Documentation**: Create README and API documentation
 
 ## Workflow
@@ -52,13 +54,26 @@ git commit -m "Initial commit: {ServiceName} microservice"
 ```
 
 ### Stage 5: Create and Push to GitHub
-Use GitHub CLI for automated GitHub operations.
 
-**Portable CLI** (Located at `C:/tools/bin/gh.exe`):
+**Option A: GitHub MCP** (Recommended - If Configured)
+
+Use GitHub MCP tools (detected from `.vscode/mcp.json`):
+```
+Tool: github_create_repository
+- name: {service-name}
+- organization: alvarodiaz-dev
+- description: ASP.NET Core microservice
+- public: true
+
+Tool: github_push_code
+- repository: alvarodiaz-dev/{service-name}
+- message: Initial commit: {ServiceName} microservice
+```
+
+**Option B: GitHub CLI** (Fallback)
+
+If MCP is unavailable, use portable CLI (Located at `C:/tools/bin/gh.exe`):
 ```powershell
-# Authenticate (one-time setup)
-C:/tools/bin/gh.exe auth login
-
 # Create repository
 C:/tools/bin/gh.exe repo create alvarodiaz-dev/{service-name} `
   --public `
@@ -70,21 +85,7 @@ C:/tools/bin/gh.exe repo create alvarodiaz-dev/{service-name} `
 C:/tools/bin/gh.exe repo view alvarodiaz-dev/{service-name}
 ```
 
-**Standard CLI Installation:**
-```bash
-# Authenticate (one-time setup)
-gh auth login
-
-# Create repository  
-gh repo create alvarodiaz-dev/{service-name} \
-  --public \
-  --source=. \
-  --remote=origin \
-  --push
-
-# Verify
-gh repo view alvarodiaz-dev/{service-name}
-```
+**MCP Status**: ✅ Configured in `.vscode/mcp.json` and ready to use.
 
 ### Stage 6: Generate Documentation
 - Create comprehensive README.md with:
@@ -104,7 +105,8 @@ gh repo view alvarodiaz-dev/{service-name}
 - DO NOT skip .gitignore—use standard C# .gitignore template
 - ALWAYS use ASP.NET Core 8.0 or latest stable LTS version
 - ALWAYS follow Microsoft's naming conventions (PascalCase for classes)
-- ALWAYS use GitHub CLI (portable: `C:/tools/bin/gh.exe` or standard: `gh`) for repository operations
+- ALWAYS use GitHub MCP if available (primary method, configured in `.vscode/mcp.json`)
+- FALLBACK to GitHub CLI (portable: `C:/tools/bin/gh.exe` or standard: `gh`) if MCP is unavailable
 - ALWAYS create repositories under `alvarodiaz-dev/` organization with lowercase service names
 
 ## GitHub CLI Setup (Required)
@@ -162,6 +164,15 @@ Before the agent can publish to GitHub:
 - **edit**: Create C# files, DTOs, controllers, services, configuration, documentation
 - **execute**: Run git commands, GitHub CLI (gh) commands, validations
 - **search**: Find code examples or best practices
+
+### MCP Tools (Optional)
+If GitHub MCP server is configured:
+- **github_create_repository**: Create new repositories programmatically
+- **github_push_code**: Push code with automatic commit handling
+- **github_get_repository**: Fetch repository metadata
+- **github_list_repositories**: List organization repositories
+
+See `.github/MCP_GITHUB_CONFIG.md` for setup instructions.
 
 ## Skills Integration
 
