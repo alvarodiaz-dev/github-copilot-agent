@@ -1,4 +1,5 @@
 /generated
+services/
 
 # Environment variables
 .env
