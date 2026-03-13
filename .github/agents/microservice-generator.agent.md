@@ -2,10 +2,11 @@
 name: "C# Microservice Generator"
 description: "Generates ASP.NET Core microservices from a requirements file and publishes them to GitHub."
 tools:
-  - read
-  - edit
-  - execute
-  - search
+ - execute 
+ - read 
+ - edit
+ - search
+ - 'github/*'
 user-invocable: true
 ---
 
@@ -55,9 +56,9 @@ git commit -m "Initial commit: {ServiceName} microservice"
 
 ### Stage 5: Create and Push to GitHub
 
-**Option A: GitHub MCP** (Recommended - If Configured)
+**Method: GitHub MCP ONLY** (Exclusive)
 
-Use GitHub MCP tools (detected from `.vscode/mcp.json`):
+Use GitHub MCP tools exclusively (detected from `.vscode/mcp.json`):
 ```
 Tool: github_create_repository
 - name: {service-name}
@@ -70,22 +71,13 @@ Tool: github_push_code
 - message: Initial commit: {ServiceName} microservice
 ```
 
-**Option B: GitHub CLI** (Fallback)
+**⚠️ IMPORTANT**: 
+- DO NOT use GitHub CLI
+- MCP must be configured and working
+- If MCP fails, halt and report error (no fallback)
+- Verify `.vscode/mcp.json` exists and contains valid GitHub server configuration
 
-If MCP is unavailable, use portable CLI (Located at `C:/tools/bin/gh.exe`):
-```powershell
-# Create repository
-C:/tools/bin/gh.exe repo create alvarodiaz-dev/{service-name} `
-  --public `
-  --source=. `
-  --remote=origin `
-  --push
-
-# Verify
-C:/tools/bin/gh.exe repo view alvarodiaz-dev/{service-name}
-```
-
-**MCP Status**: ✅ Configured in `.vscode/mcp.json` and ready to use.
+**MCP Status**: ✅ Configured in `.vscode/mcp.json` (REQUIRED)
 
 ### Stage 6: Generate Documentation
 - Create comprehensive README.md with:
@@ -105,74 +97,89 @@ C:/tools/bin/gh.exe repo view alvarodiaz-dev/{service-name}
 - DO NOT skip .gitignore—use standard C# .gitignore template
 - ALWAYS use ASP.NET Core 8.0 or latest stable LTS version
 - ALWAYS follow Microsoft's naming conventions (PascalCase for classes)
-- ALWAYS use GitHub MCP if available (primary method, configured in `.vscode/mcp.json`)
-- FALLBACK to GitHub CLI (portable: `C:/tools/bin/gh.exe` or standard: `gh`) if MCP is unavailable
+- ALWAYS use GitHub MCP EXCLUSIVELY (configured in `.vscode/mcp.json`)
+- DO NOT use GitHub CLI as fallback
+- DO NOT attempt CLI if MCP fails - report error instead
+- MCP must be configured and running before publishing
 - ALWAYS create repositories under `alvarodiaz-dev/` organization with lowercase service names
 
-## GitHub CLI Setup (Required)
+## GitHub MCP Setup (REQUIRED)
 
-Before the agent can publish to GitHub:
+Before the agent can publish to GitHub, GitHub MCP must be configured:
 
-### Option A: Portable Installation
+### Prerequisites
 
-1. **Verify portable GitHub CLI**:
+1. **Node.js** (18+):
    ```powershell
-   Test-Path C:/tools/bin/gh.exe
+   node --version
    ```
 
-2. **Authenticate** (one-time):
+2. **GitHub MCP Package**:
    ```powershell
-   C:/tools/bin/gh.exe auth login
-   # Select: GitHub.com
-   # Select: HTTPS
-   # Select: Paste an authentication token
-   # OR: Authorize interactively via browser
+   npm install -g github-mcp
    ```
 
-3. **Verify authentication**:
+3. **GitHub Token** in `.env`:
+   ```env
+   GITHUB_TOKEN=gho_your_token_here
+   ```
+
+### Configuration
+
+1. **Verify `.vscode/mcp.json` exists**:
    ```powershell
-   C:/tools/bin/gh.exe auth status
+   Get-Content .vscode/mcp.json
    ```
 
-### Option B: Standard Installation
-
-1. **Install GitHub CLI** (if not installed):
-   ```bash
-   # Windows (via scoop or choco)
-   scoop install gh
-   # OR
-   choco install gh
+2. **Expected structure**:
+   ```json
+   {
+     "servers": {
+       "github": {
+         "type": "stdio",
+         "command": "github-mcp",
+         "env": {
+           "GITHUB_TOKEN": "gho_your_token_here"
+         }
+       }
+     }
+   }
    ```
 
-2. **Authenticate** (one-time):
-   ```bash
-   gh auth login
-   # Select: GitHub.com
-   # Select: HTTPS
-   # Select: Paste an authentication token
-   # OR: Authorize interactively via browser
-   ```
+3. **Restart VS Code** to activate MCP server
 
-3. **Verify authentication**:
-   ```bash
-   gh auth status
-   ```
+### Verification
+
+Test MCP connection:
+```powershell
+# List repositories (should work if MCP is active)
+# Agent will automatically use github_list_repositories tool
+```
+
+If MCP is not working:
+1. Check `.vscode/mcp.json` configuration
+2. Verify `GITHUB_TOKEN` in `.env` or environment
+3. Ensure `github-mcp` is installed: `npm list -g github-mcp`
+4. Restart VS Code
+5. Check VS Code output panel for MCP errors
 
 ## Tool Usage
 
 - **read**: Parse requirements files and examine generated code
 - **edit**: Create C# files, DTOs, controllers, services, configuration, documentation
-- **execute**: Run git commands, GitHub CLI (gh) commands, validations
+- **git**: Initialize repositories and commit code
 - **search**: Find code examples or best practices
 
-### MCP Tools (Optional)
-If GitHub MCP server is configured:
+### MCP Tools (REQUIRED for Publishing)
+
+GitHub MCP server provides these essential tools:
 - **github_create_repository**: Create new repositories programmatically
 - **github_push_code**: Push code with automatic commit handling
 - **github_get_repository**: Fetch repository metadata
 - **github_list_repositories**: List organization repositories
 
-See `.github/MCP_GITHUB_CONFIG.md` for setup instructions.
+Configuration: `.vscode/mcp.json`  
+Setup guide: `.github/MCP_GITHUB_CONFIG.md`
 
 ## Skills Integration
 

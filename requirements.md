@@ -1,35 +1,26 @@
-# Microservice Requirements
-
-## AuthService
+## NotificationService
 
 ### Purpose
-Handles basic user authentication for the system. Allows users to register and log in.
+Sends notifications via email and SMS
 
 ### Endpoints
-
-- POST /auth/register - Register a new user
-- POST /auth/login - Log in with email and password
-- GET /auth/users - List registered users
+- POST /notifications/send-email
+- POST /notifications/send-sms  
+- GET /notifications/{id}/status
 
 ### Data Models
-
-**User**
+**Notification**
 - id: UUID
-- email: string
-- password: string
+- type: string
+- recipient: string
+- message: string
 
-**RegisterRequest**
+**EmailRequest**
 - email: string
-- password: string
-
-**LoginRequest**
-- email: string
-- password: string
-
-**LoginResponse**
-- token: string
-- userId: UUID
+- subject: string
+- body: string
 
 ### External Dependencies
-- PostgreSQL Database
-- JWT Authentication
+- SendGrid
+- Twilio
+- PostgreSQL
